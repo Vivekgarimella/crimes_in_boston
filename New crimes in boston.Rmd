@@ -1,0 +1,86 @@
+---
+title: "Crimes New"
+author: "SaiNagaChandraVivekGarimella"
+date: "August 17, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(maps)
+library(lubridate)
+crime1<-read.csv("C:/Users/garim/OneDrive/Desktop/NEU/Introduction to Data Management and Processing/data sets/crimes-in-boston/crime.csv")
+crime1<-drop_na(crime1)
+
+new<-crime1 %>% group_by(OFFENSE_CODE_GROUP)  %>% summarise(total=n()) %>% arrange(desc(total)) %>% top_n(5)
+
+crime1<-left_join(new,crime1)
+
+#locations
+corners<-map_data('state',region='massachusetts')
+
+ggplot(corners)+geom_polygon(mapping = aes(x=long,y=lat),fill=NA,color="black")+ geom_point(data = crime1,mapping = aes(x=Long,y=Lat,color=OFFENSE_CODE_GROUP))+coord_cartesian(xlim = c(-71,-71.2) ,ylim=c(42.22, 42.37))
+
+
+
+#OFFENSE_CODE_GROUP
+new %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=total,fill=OFFENSE_CODE_GROUP))+geom_bar(stat = 'identity')+coord_flip()
+
+#CRIMES IN RESPECTIVE STREETS
+first<-crime1%>% group_by(OFFENSE_CODE_GROUP,STREET) %>% summarise(crimes_in_respective_streets=n()) %>% arrange(desc(crimes_in_respective_streets)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(5)
+
+left_join(first,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_streets,fill=STREET))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()
+
+#CRIMES IN RESPECTIVE YEAR
+second<-crime1%>% group_by(OFFENSE_CODE_GROUP,YEAR) %>% summarise(crimes_in_respective_year=n()) %>% arrange(desc(crimes_in_respective_year)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(5)
+
+left_join(second,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_year,fill=as.factor(YEAR)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='YEAR')
+
+#CRIMES IN RESPECTIVE MONTH
+third<-crime1%>% group_by(OFFENSE_CODE_GROUP,MONTH) %>% summarise(crimes_in_respective_month=n()) %>% arrange(desc(crimes_in_respective_month)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+left_join(third,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_month,fill=as.factor(MONTH)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='MONTHS IN AN YEAR')
+
+
+#DAY OF WEEK
+fourth<-crime1%>% group_by(OFFENSE_CODE_GROUP,DAY_OF_WEEK) %>% summarise(crimes_in_respective_day_of_week=n()) %>% arrange(desc(crimes_in_respective_day_of_week)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+
+left_join(fourth,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_day_of_week,fill=as.factor(DAY_OF_WEEK)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='DAY OF WEEK')
+
+crime1<-crime1 %>% mutate(date=substring(crime1[['OCCURRED_ON_DATE']],9,10))
+
+#DATE IN MONTH
+fifth<-crime1%>% group_by(OFFENSE_CODE_GROUP,date) %>% summarise(crimes_in_respective_date_in_month=n()) %>% arrange(desc(crimes_in_respective_date_in_month)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+left_join(fifth,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_date_in_month,fill=as.factor(date)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='DATE IN MONTH')
+
+#HOUR IN DAY
+sixth<-crime1%>% group_by(OFFENSE_CODE_GROUP,HOUR) %>% summarise(crimes_in_respective_hour_in_day=n()) %>% arrange(desc(crimes_in_respective_hour_in_day)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+left_join(sixth,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_hour_in_day,fill=as.factor(HOUR)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='HOUR IN DAY')
+
+#ON_PARTICULAR_DATE
+
+seventh<-crime1%>% group_by(OFFENSE_CODE_GROUP,OCCURRED_ON_DATE) %>% summarise(crimes_on_particular_day=n()) %>% arrange(desc(crimes_on_particular_day)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+left_join(seventh,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_on_particular_day,fill=as.factor(OCCURRED_ON_DATE)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='UCR_PART')
+
+#REPORTING_AREA
+
+eigth<-crime1%>% group_by(OFFENSE_CODE_GROUP,REPORTING_AREA) %>% summarise(crimes_reporting_area=n()) %>% arrange(desc(crimes_reporting_area)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+left_join(eigth,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_reporting_area,fill=as.factor(REPORTING_AREA)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='UCR_PART')
+
+
+
+
+
+```
+
