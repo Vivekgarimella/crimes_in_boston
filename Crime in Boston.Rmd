@@ -1,0 +1,89 @@
+---
+title: "Crimes in boston"
+author: "SaiNagaChandraVivekGarimella"
+date: "September 21, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyverse)
+library(maps)
+library(lubridate)
+crime1<-read.csv("C:/Users/garim/OneDrive/Desktop/NEU/Introduction to Data Management and Processing/data sets/crimes-in-boston/crime.csv")
+crime1<-drop_na(crime1)
+
+new<-crime1 %>% group_by(OFFENSE_CODE_GROUP)  %>% summarise(total=n()) %>% arrange(desc(total)) %>% top_n(5)
+
+crime1<-left_join(new,crime1)
+
+#locations
+corners<-map_data('state',region='massachusetts')
+
+
+ggplot(corners)+geom_polygon(mapping = aes(x=long,y=lat),fill=NA,color="black")+ geom_point(data = crime1,mapping = aes(x=Long,y=Lat,color=OFFENSE_CODE_GROUP))+coord_cartesian(xlim = c(-71,-71.2) ,ylim=c(42.22, 42.37))+labs(title = 'Top 5 Crimes reported in Boston',fill='Types of crime',x='Longitude',y='Latitude')
+
+
+
+
+#OFFENSE_CODE_GROUP
+new %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=total,fill=OFFENSE_CODE_GROUP))+geom_bar(stat = 'identity')+coord_flip()+labs(title = 'Top 5 crimes reported in Boston',x='Crime',y='number of incidents reported',fill='Crime')+geom_text(aes(x=OFFENSE_CODE_GROUP,y=total+6000,label = round(total, 2)))
+
+
+#CRIMES IN RESPECTIVE STREETS
+first<-crime1%>% group_by(OFFENSE_CODE_GROUP,STREET) %>% summarise(crimes_in_respective_streets=n()) %>% arrange(desc(crimes_in_respective_streets)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(5)
+
+left_join(first,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_streets,fill=STREET))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(title = 'Streets in which each of the top-5 crimes is frequently reported',x='Street',y='Number of incidents reported')+geom_text(aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_streets+150,label = round(crimes_in_respective_streets, 2)), position = position_dodge(0.9),vjust = 0.5)
+
+#CRIMES IN RESPECTIVE YEAR
+second<-crime1%>% group_by(OFFENSE_CODE_GROUP,YEAR) %>% summarise(crimes_in_respective_year=n()) %>% arrange(desc(crimes_in_respective_year)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(5)
+
+left_join(second,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_year,fill=as.factor(YEAR)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='YEAR')+labs(title = 'Change in number of incidents of each crime',x='Crime',y='number of incidents reported',fill='Crime')+geom_text(aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_year+500,label = round(crimes_in_respective_year, 2)),, position = position_dodge(0.9),vjust = 0.5)
+
+
+#CRIMES IN RESPECTIVE MONTH
+third<-crime1%>% group_by(OFFENSE_CODE_GROUP,MONTH) %>% summarise(crimes_in_respective_month=n()) %>% arrange(desc(crimes_in_respective_month)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+left_join(third,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_month,fill=as.factor(MONTH)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='MONTHS IN AN YEAR',x='Month',y='Numbe of crimes reported',title = 'Months in which each of Top-5 crimes is frequently reported')+geom_text(aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_month+250,label = round(crimes_in_respective_month, 2)), position = position_dodge(0.9),vjust = 0.5)
+
+
+
+#DAY OF WEEK
+fourth<-crime1%>% group_by(OFFENSE_CODE_GROUP,DAY_OF_WEEK) %>% summarise(crimes_in_respective_day_of_week=n()) %>% arrange(desc(crimes_in_respective_day_of_week)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+left_join(fourth,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_day_of_week,fill=as.factor(DAY_OF_WEEK)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='DAY OF WEEK')+labs(fill='Day in a week',x='Crime',y='Numbe of crimes reported')+geom_text(aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_day_of_week+500,label = round(crimes_in_respective_day_of_week, 2)), position = position_dodge(0.9),vjust = 0.5)
+
+crime1<-crime1 %>% mutate(date=substring(crime1[['OCCURRED_ON_DATE']],9,10))
+
+#DATE IN MONTH
+fifth<-crime1%>% group_by(OFFENSE_CODE_GROUP,date) %>% summarise(crimes_in_respective_date_in_month=n()) %>% arrange(desc(crimes_in_respective_date_in_month)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+left_join(fifth,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_date_in_month,fill=as.factor(date)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(title='Dates on which most number of Top-5 crimes reported',x='Crime',y='Number of crimes reported',fill='DATE IN MONTH')+geom_text(aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_date_in_month+100,label = round(crimes_in_respective_date_in_month, 2)), position = position_dodge(0.9),vjust = 0.5)
+
+
+#HOUR IN DAY
+sixth<-crime1%>% group_by(OFFENSE_CODE_GROUP,HOUR) %>% summarise(crimes_in_respective_hour_in_day=n()) %>% arrange(desc(crimes_in_respective_hour_in_day)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+left_join(sixth,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_hour_in_day,fill=as.factor(HOUR)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='HOUR IN DAY',x='Crime',y='Number of incidents reported',title='Hour of a day in which each of Top-5 crimes has occurred')+geom_text(aes(x=OFFENSE_CODE_GROUP,y=crimes_in_respective_hour_in_day+150,label = round(crimes_in_respective_hour_in_day, 2)), position = position_dodge(0.9),vjust = 0.5)
+
+
+#ON_PARTICULAR_DATE
+
+seventh<-crime1%>% group_by(OFFENSE_CODE_GROUP,OCCURRED_ON_DATE) %>% summarise(crimes_on_particular_day=n()) %>% arrange(desc(crimes_on_particular_day)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+left_join(seventh,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_on_particular_day,fill=as.factor(OCCURRED_ON_DATE)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='Secific Date ',x='Crime',y='Number of incidents reported',title = 'Specific date on which each of top-5 crimes has frequently occurred')+geom_text(aes(x=OFFENSE_CODE_GROUP,y=crimes_on_particular_day+0.2,label = round(crimes_on_particular_day, 2)), position = position_dodge(0.9),vjust = 0.5)
+
+#REPORTING_AREA
+
+eigth<-crime1%>% group_by(OFFENSE_CODE_GROUP,REPORTING_AREA) %>% summarise(crimes_reporting_area=n()) %>% arrange(desc(crimes_reporting_area)) %>% group_by(OFFENSE_CODE_GROUP) %>% top_n(3)
+
+left_join(eigth,new) %>% ggplot(mapping = aes(x=OFFENSE_CODE_GROUP,y=crimes_reporting_area,fill=as.factor(REPORTING_AREA)))+geom_bar(stat = 'identity',position = 'dodge')+coord_flip()+labs(fill='UCR PART',x='Crime',y='Number of incidents reported',title = 'Different UCR categories of crimes reported')+geom_text(aes(x=OFFENSE_CODE_GROUP,y=crimes_reporting_area+50,label = round(crimes_reporting_area, 2)), position = position_dodge(0.9),vjust = 0.5)
+
+
+
+
+```
+
