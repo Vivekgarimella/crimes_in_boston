@@ -1,7 +1,11 @@
 Analysis on Crimes in Boston(2015-2018).
+
 •	Spotted locations of crime scenes noted over 37,713 incidents on the map of Boston.
+
 •	Identified Top-5 more frequently recorded crimes out of 67 crimes around Boston.
+
 •	Identified streets where each of Top-5 crimes are frequently recorded.
+
 •	Performed time-based analysis on Top-5 crimes in Boston, to extract patterns.
 
 Insights:
@@ -24,7 +28,7 @@ Crimes related to medical assistance, Larency and simple assualt are mostly repo
 And at what hour these crimes are mostly reported is identified. Most people think that all these crimes occur during night time but all these are mostly reported between 10th and 18th hour of a day. So one must be careful during these regular hours too.
 ![](https://github.com/Vivekgarimella/crimes_in_boston/blob/master/crimes%20in%20boston/hourly.jpeg)
 
-The dates in a month on which theese crimes are frequently reported are observed. Medical assistance related crimes are commited mostly during first half of the month, and others are mostly reported during later half of the month. This may lead to any specific observation like crimes might happen during the pay-roll period where people might get drunk and commit crimes or commit crimes due to craving. All such factors must be considered and a solution must be found .
+The dates in a month on which theese crimes are frequently reported are observed. Medical assistance related crimes are commited mostly during first half of the month, and others are mostly reported during later half of the month. This may lead to any specific observation like crimes might happen on a payday where people might get drunk and commit crimes unknowingly or might commit crimes in need of money. All such factors must be considered and a solution to curb these crimes must be identified.
 ![](https://github.com/Vivekgarimella/crimes_in_boston/blob/master/crimes%20in%20boston/Dates.jpeg)
 
 Any specific days on which multiple incidents are reported are visualised. So any particular reason for multiple incidents on that particular day can be identified. Like there might be some concert or farewell party or graduation cermony going around which might lead to some crimes in and around the city during those events. All such things can be noted and enough measures must be taken to prevent crimes from happening in future on such days.
